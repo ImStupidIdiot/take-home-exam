@@ -3,13 +3,31 @@ from urllib.parse import urljoin
 import requests
 
 def make_request_request(server_url, message):
-    full_url = urljoin(server_url, "/message")
+    # full_url = urljoin(server_url, "/message")
 
     raw_data = dict()
-    raw_data["data"] = {"command": None, "message": message } 
+    # raw_data["data"] = {"command": None, "message": message } 
+
+    if message[0] == "/":
+        # split into two parts based on first whitespace following "/"
+        try: 
+            splitCommand = message.split(' ', 1)
+            # assign first part less the "/" to the command variable
+            command = splitCommand[0]
+            # assign the rest to the message variable
+            message = splitCommand[1]
+        except:
+            command = splitCommand[0]
+            message = ""
+    else:
+        command = '/message'
+        message = message
+
+    full_url = urljoin(server_url, command)
+    raw_data["data"] = {"command": command, "message": message } 
     
     try: 
-        r = requests.post(full_url, json=raw_data)
+        r = requests.get(full_url, json=raw_data)
         r.raise_for_status()
     except requests.exceptions.ConnectionError as err:
         # eg, no internet
